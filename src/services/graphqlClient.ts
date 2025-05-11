@@ -14,6 +14,14 @@ interface DeepSeekResponse {
   };
 }
 
+interface AskAIResponse {
+  askAI: {
+    content: string;
+    model: string;
+    provider: string;
+  };
+}
+
 export const graphqlClient = {
   async query<T>(query: string, variables?: Record<string, any>): Promise<T> {
     try {
@@ -63,5 +71,21 @@ export const graphqlClient = {
 
     const data = await this.query<DeepSeekResponse>(query, { prompt });
     return data.deepseek.content;
+  },
+
+  // 添加 askAI 方法
+  async askAI(prompt: string, provider: 'openai' | 'deepseek' = 'deepseek'): Promise<string> {
+    const query = `
+      query askAI($prompt: String!, $provider: String) {
+        askAI(prompt: $prompt, provider: $provider) {
+          content
+          model
+          provider
+        }
+      }
+    `;
+
+    const data = await this.query<AskAIResponse>(query, { prompt, provider });
+    return data.askAI.content;
   },
 };

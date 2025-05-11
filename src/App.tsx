@@ -1,5 +1,4 @@
 // src/App.tsx
-import React from 'react';
 import AIChat from './components/AIChat/AIChat';
 
 function App() {
