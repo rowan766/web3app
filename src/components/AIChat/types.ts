@@ -9,4 +9,5 @@ export interface Message {
 export interface AIChatProps {
   onSendMessage?: (message: string) => Promise<string>;
   placeholder?: string;
+  provider?: 'openai' | 'deepseek';
 }

@@ -2,14 +2,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './AIChat.module.css';
 import type { Message, AIChatProps } from './types';
+import { graphqlClient } from '../../services/graphqlClient';
 
 const AIChat: React.FC<AIChatProps> = ({ 
   onSendMessage, 
-  placeholder = "输入你的问题..." 
+  placeholder = "输入你的问题...",
+  provider = 'deepseek'  // 默认使用 DeepSeek
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<'openai' | 'deepseek'>(provider);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -36,10 +39,27 @@ const AIChat: React.FC<AIChatProps> = ({
     setIsLoading(true);
 
     try {
-      // 如果没有提供 onSendMessage，使用模拟响应
-      const response = onSendMessage 
-        ? await onSendMessage(userMessage.content)
-        : `这是对"${userMessage.content}"的模拟回答。在实际应用中，你需要连接到真实的 AI API。`;
+      let response: string;
+      
+      // 如果提供了自定义的 onSendMessage，使用它
+      if (onSendMessage) {
+        response = await onSendMessage(userMessage.content);
+      } else {
+        // 否则使用 GraphQL 客户端
+        try {
+          // 首选：使用智能 AI（支持故障转移）
+          response = await graphqlClient.askAI(userMessage.content, selectedProvider);
+        } catch (error) {
+          console.error(`${selectedProvider} failed, trying direct DeepSeek...`);
+          // 备选：直接调用 DeepSeek
+          try {
+            response = await graphqlClient.askDeepSeek(userMessage.content);
+          } catch (deepseekError) {
+            console.error('DeepSeek also failed:', deepseekError);
+            throw deepseekError;
+          }
+        }
+      }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -53,7 +73,7 @@ const AIChat: React.FC<AIChatProps> = ({
       console.error('Error sending message:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: '抱歉，发生了错误。请稍后再试。',
+        content: `抱歉，发生了错误：${error instanceof Error ? error.message : '未知错误'}。请稍后再试。`,
         role: 'assistant',
         timestamp: new Date()
       };
@@ -65,6 +85,22 @@ const AIChat: React.FC<AIChatProps> = ({
 
   return (
     <div className={styles.chatContainer}>
+      {/* 添加提供商选择器（可选） */}
+      <div className={styles.providerSelector}>
+        <button
+          className={`${styles.providerButton} ${selectedProvider === 'deepseek' ? styles.active : ''}`}
+          onClick={() => setSelectedProvider('deepseek')}
+        >
+          DeepSeek
+        </button>
+        <button
+          className={`${styles.providerButton} ${selectedProvider === 'openai' ? styles.active : ''}`}
+          onClick={() => setSelectedProvider('openai')}
+        >
+          OpenAI
+        </button>
+      </div>
+
       <div className={styles.messagesContainer}>
         {messages.map((message) => (
           <div

@@ -1,35 +1,26 @@
-// App.tsx
-import AIChat from './components/AIChat/AIChat'
-import './App.css'
+// src/App.tsx
+import React from 'react';
+import AIChat from './components/AIChat/AIChat';
 
 function App() {
-  // 模拟 AI 响应的函数
-  const handleSendMessage = async (message: string): Promise<string> => {
-    // 模拟网络延迟
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // 这里你可以调用真实的 AI API
-    // const response = await fetch('your-ai-api-endpoint', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ message })
-    // });
-    // const data = await response.json();
-    // return data.reply;
-    
-    // 模拟响应
-    return `这是对"${message}"的回答。在实际应用中，你需要连接到真实的 AI API，比如 OpenAI、Claude API 等。`;
-  };
-
   return (
-    <div className="app">
-      <h1>AI 问答助手</h1>
-      <AIChat 
-        onSendMessage={handleSendMessage}
-        placeholder="问我任何问题..."
-      />
+    <div className="App">
+      <h1>AI Chat Demo</h1>
+      {/* 使用默认的 DeepSeek 提供商 */}
+      {/* <AIChat /> */}
+      
+      {/* 或者明确指定提供商 */}
+      <AIChat provider="deepseek" />
+      
+      {/* 或者提供自定义的消息处理函数 */}
+      {/* <AIChat 
+        onSendMessage={async (message) => {
+          // 自定义处理逻辑
+          return `自定义响应: ${message}`;
+        }}
+      /> */}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
