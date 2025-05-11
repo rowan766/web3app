@@ -4,7 +4,6 @@ import AIChat from './components/AIChat/AIChat';
 function App() {
   return (
     <div className="App">
-      <h1>AI Chat Demo</h1>
       {/* 使用默认的 DeepSeek 提供商 */}
       {/* <AIChat /> */}
       

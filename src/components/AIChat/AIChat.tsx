@@ -5,6 +5,9 @@ import styles from './AIChat.module.css';
 import type { Message, AIChatProps } from './types';
 import { graphqlClient } from '../../services/graphqlClient';
 
+// react-markdown 类型定义
+import type { Components } from 'react-markdown';
+
 const AIChat: React.FC<AIChatProps> = ({ 
   onSendMessage, 
   placeholder = "输入你的问题...",
@@ -84,6 +87,31 @@ const AIChat: React.FC<AIChatProps> = ({
     }
   };
 
+  // 定义 Markdown 组件的类型
+  const markdownComponents: Partial<Components> = {
+    // 自定义代码块渲染
+    code: ({ node, inline, className, children, ...props }) => {
+      const match = /language-(\w+)/.exec(className || '');
+      return !inline && match ? (
+        <pre className={styles.codeBlock}>
+          <code className={className} {...props}>
+            {children}
+          </code>
+        </pre>
+      ) : (
+        <code className={inline ? styles.inlineCode : styles.codeBlock} {...props}>
+          {children}
+        </code>
+      );
+    },
+    // 确保链接在新窗口打开
+    a: ({ node, children, ...props }) => (
+      <a {...props} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    ),
+  };
+
   // 渲染消息内容，支持 Markdown
   const renderMessageContent = (message: Message) => {
     if (message.role === 'user') {
@@ -94,30 +122,7 @@ const AIChat: React.FC<AIChatProps> = ({
     // AI 消息使用 Markdown 渲染
     return (
       <div className={styles.messageMarkdown}>
-        <ReactMarkdown
-          components={{
-            // 自定义一些组件的渲染，确保样式正确
-            code: ({ inline, className, children, ...props }) => {
-              return inline ? (
-                <code className={styles.inlineCode} {...props}>
-                  {children}
-                </code>
-              ) : (
-                <pre className={styles.codeBlock}>
-                  <code className={className} {...props}>
-                    {children}
-                  </code>
-                </pre>
-              );
-            },
-            // 确保链接在新窗口打开
-            a: ({ children, ...props }) => (
-              <a {...props} target="_blank" rel="noopener noreferrer">
-                {children}
-              </a>
-            ),
-          }}
-        >
+        <ReactMarkdown components={markdownComponents}>
           {message.content}
         </ReactMarkdown>
       </div>
