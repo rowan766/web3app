@@ -1,5 +1,6 @@
 // src/components/AIChat/AIChat.tsx
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import styles from './AIChat.module.css';
 import type { Message, AIChatProps } from './types';
 import { graphqlClient } from '../../services/graphqlClient';
@@ -83,74 +84,116 @@ const AIChat: React.FC<AIChatProps> = ({
     }
   };
 
-  return (
-    <div className={styles.chatContainer}>
-      {/* 添加提供商选择器（可选） */}
-      <div className={styles.providerSelector}>
-        <button
-          className={`${styles.providerButton} ${selectedProvider === 'deepseek' ? styles.active : ''}`}
-          onClick={() => setSelectedProvider('deepseek')}
+  // 渲染消息内容，支持 Markdown
+  const renderMessageContent = (message: Message) => {
+    if (message.role === 'user') {
+      // 用户消息保持纯文本
+      return <div className={styles.messageText}>{message.content}</div>;
+    }
+    
+    // AI 消息使用 Markdown 渲染
+    return (
+      <div className={styles.messageMarkdown}>
+        <ReactMarkdown
+          components={{
+            // 自定义一些组件的渲染，确保样式正确
+            code: ({ inline, className, children, ...props }) => {
+              return inline ? (
+                <code className={styles.inlineCode} {...props}>
+                  {children}
+                </code>
+              ) : (
+                <pre className={styles.codeBlock}>
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                </pre>
+              );
+            },
+            // 确保链接在新窗口打开
+            a: ({ children, ...props }) => (
+              <a {...props} target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            ),
+          }}
         >
-          DeepSeek
-        </button>
-        <button
-          className={`${styles.providerButton} ${selectedProvider === 'openai' ? styles.active : ''}`}
-          onClick={() => setSelectedProvider('openai')}
-        >
-          OpenAI
-        </button>
+          {message.content}
+        </ReactMarkdown>
       </div>
+    );
+  };
 
-      <div className={styles.messagesContainer}>
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`${styles.message} ${
-              message.role === 'user' ? styles.userMessage : styles.assistantMessage
-            }`}
+  return (
+    <div className={styles.chatWrapper}>
+      <div className={styles.chatContainer}>
+        {/* 添加提供商选择器（可选） */}
+        <div className={styles.providerSelector}>
+          <button
+            className={`${styles.providerButton} ${selectedProvider === 'deepseek' ? styles.active : ''}`}
+            onClick={() => setSelectedProvider('deepseek')}
           >
-            <div className={styles.messageContent}>
-              {message.content}
-            </div>
-            <div className={styles.messageTime}>
-              {message.timestamp.toLocaleTimeString('zh-CN', {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className={`${styles.message} ${styles.assistantMessage}`}>
-            <div className={styles.messageContent}>
-              <div className={styles.loading}>
-                <span></span>
-                <span></span>
-                <span></span>
+            DeepSeek
+          </button>
+          <button
+            className={`${styles.providerButton} ${selectedProvider === 'openai' ? styles.active : ''}`}
+            onClick={() => setSelectedProvider('openai')}
+          >
+            OpenAI
+          </button>
+        </div>
+
+        <div className={styles.messagesContainer}>
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`${styles.message} ${
+                message.role === 'user' ? styles.userMessage : styles.assistantMessage
+              }`}
+            >
+              <div className={styles.messageContent}>
+                {renderMessageContent(message)}
+              </div>
+              <div className={styles.messageTime}>
+                {message.timestamp.toLocaleTimeString('zh-CN', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
               </div>
             </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          ))}
+          {isLoading && (
+            <div className={`${styles.message} ${styles.assistantMessage}`}>
+              <div className={styles.messageContent}>
+                <div className={styles.loading}>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
-      <form onSubmit={handleSubmit} className={styles.inputForm}>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder={placeholder}
-          className={styles.input}
-          disabled={isLoading}
-        />
-        <button
-          type="submit"
-          className={styles.sendButton}
-          disabled={!inputValue.trim() || isLoading}
-        >
-          发送
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} className={styles.inputForm}>
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder={placeholder}
+            className={styles.input}
+            disabled={isLoading}
+          />
+          <button
+            type="submit"
+            className={styles.sendButton}
+            disabled={!inputValue.trim() || isLoading}
+          >
+            发送
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
