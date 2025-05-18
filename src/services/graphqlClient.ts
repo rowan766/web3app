@@ -74,7 +74,7 @@ export const graphqlClient = {
   },
 
   // 添加 askAI 方法
-  async askAI(prompt: string, provider: 'openai' | 'deepseek' = 'deepseek'): Promise<string> {
+  async askAI(prompt: string, provider: 'openai'): Promise<string> {
     const query = `
       query askAI($prompt: String!, $provider: String) {
         askAI(prompt: $prompt, provider: $provider) {

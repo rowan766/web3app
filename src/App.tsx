@@ -8,7 +8,7 @@ function App() {
       {/* <AIChat /> */}
       
       {/* 或者明确指定提供商 */}
-      <AIChat provider="deepseek" />
+      <AIChat provider="openai" />
       
       {/* 或者提供自定义的消息处理函数 */}
       {/* <AIChat 
