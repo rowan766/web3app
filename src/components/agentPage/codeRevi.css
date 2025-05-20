@@ -190,6 +190,7 @@ body {
   font-size: 0.95rem;
   background-color: #f5f7fa;
   transition: border-color 0.2s, box-shadow 0.2s;
+  color: #21252b !important;
 }
 
 .chat-input:focus {
