@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/aichat/aichat.tsx","./src/components/aichat/types.ts","./src/services/graphqlclient.ts"],"version":"5.8.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/aichat/aichat.tsx","./src/components/aichat/types.ts","./src/components/agentpage/coderevi copy.tsx","./src/components/agentpage/coderevi.tsx","./src/services/graphqlclient.ts"],"version":"5.8.3"}
