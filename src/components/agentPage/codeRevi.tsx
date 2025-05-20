@@ -207,9 +207,9 @@ const ChatInterface: React.FC = () => {
       <ReactMarkdown
         components={{
           // 修复: 修复 ReactMarkdown 组件的类型问题
-          code({ className, children, ...props }: { className?: string; children: React.ReactNode; [key: string]: any }) {
+          code: ({ node, inline, className, children, ...props }: any) => {
             const match = /language-(\w+)/.exec(className || '');
-            return !props.inline ? (
+            return !inline ? (
               <pre className={match ? `language-${match[1]}` : ''}>
                 <code className={className} {...props}>
                   {children}
