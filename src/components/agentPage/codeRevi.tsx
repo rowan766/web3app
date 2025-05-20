@@ -44,7 +44,7 @@ const ChatInterface: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   // 代码审查模式
   const [reviewMode, setReviewMode] = useState<'chat' | 'diff'>('chat');
-  // 当前审查的文件
+  // 当前审查的文件 - 修复：在代码差异头部显示此变量
   const [currentFile, setCurrentFile] = useState<string>('');
   // 模拟代码差异数据
   const [codeDiffs, setCodeDiffs] = useState<CodeDiff[]>([]);
@@ -187,12 +187,12 @@ const ChatInterface: React.FC = () => {
 
     return codeDiffs.map((diff, index) => (
       <div key={index} className="code-diff">
-        <div className="code-diff-header">{diff.filename}</div>
+        <div className="code-diff-header">{currentFile || diff.filename}</div>
         {diff.changes.map((change, lineIndex) => (
           <div key={lineIndex} className={`diff-line diff-${change.type}`}>
             <span className="diff-line-number">{change.lineNumber}</span>
             <span className="diff-line-content">
-              {change.type === 'added' ? '+ ' : change.type === 'removed' ? '- ' : '  '}
+              <span className="diff-prefix">{change.type === 'added' ? '+ ' : change.type === 'removed' ? '- ' : '  '}</span>
               {change.content}
             </span>
           </div>
@@ -206,10 +206,10 @@ const ChatInterface: React.FC = () => {
     return (
       <ReactMarkdown
         components={{
-          // 自定义代码块渲染
-          code({ node, inline, className, children, ...props }) {
+          // 修复: 修复 ReactMarkdown 组件的类型问题
+          code({ className, children, ...props }: { className?: string; children: React.ReactNode; [key: string]: any }) {
             const match = /language-(\w+)/.exec(className || '');
-            return !inline ? (
+            return !props.inline ? (
               <pre className={match ? `language-${match[1]}` : ''}>
                 <code className={className} {...props}>
                   {children}
